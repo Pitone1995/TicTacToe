@@ -126,7 +126,7 @@ Move Board::getUserMove() {
 
 int Board::getCoord(const string &coordType) {
 
-    // non farlo esplodere se inserisco stringa o carattere
+    // TODO: don't crash if insert char or string
     int c = 0;
 
     while (c < 1 || c > 3) {
@@ -142,12 +142,12 @@ int Board::getCoord(const string &coordType) {
 
     Move m;
     
-    // Computer deve scegliere una tra le mosse_disp
+    // COMPUTER picks a random move in movesAvailable
     int index = getRandomInt(0, movesAvailable.size() - 1);
     int pos = movesAvailable.at(index);
 
     /*
-    Mappo pos in r,c:
+    Map pos in r,c:
 
     pos:    | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
     {r,c}:  |1,1|1,2|1,3|2,1|2,2|2,3|3,1|3,2|3,3|
@@ -185,7 +185,7 @@ void Board::setMove(const Move &m, const Player &p) {
     int pos;
 
     /*
-    Mappo r,c in pos:
+    Map r,c in pos:
 
     {r,c}:  |1,1|1,2|1,3|2,1|2,2|2,3|3,1|3,2|3,3|
     pos:    | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
@@ -205,31 +205,30 @@ void Board::setMove(const Move &m, const Player &p) {
         break;
     }
 
-    // Salvo la mossa nell'array generale
+    // Save move in the general array
     moves[pos] = m;
 
     /*
-    mosse_player[p] è un intero che rappresenta le mosse del giocatore p
-    salvo la mossa mettendo a 1 il bit corrispondente
+    movesPlayer[p] is an integer that represents moves of player p
+    the move is saved setting corresponding bit to 1
 
-    esempio:
+    example:
 
     {r,c} = 1,2 -> pos = 1
-    mosse_player[p] =          0b 0 1 0 0 0 0 0 0 0
+    movesPlayer[p] =          0b 0 1 0 0 0 0 0 0 0
 
     {r,c} = 1,1 -> pos = 0
-    mosse_player[p] =          0b 1 1 0 0 0 0 0 0 0
+    movesPlayer[p] =          0b 1 1 0 0 0 0 0 0 0
 
     {r,c} = 3,1 -> pos = 6
-    mosse_player[p] =          0b 1 1 0 0 0 0 1 0 0
+    movesPlayer[p] =          0b 1 1 0 0 0 0 1 0 0
 
     {r,c} = 1,3 -> pos = 2
-    mosse_player[p] =          0b 1 1 1 0 0 0 1 0 0
+    movesPlayer[p] =          0b 1 1 1 0 0 0 1 0 0
     */
-
     movesPlayer[p] |= (1 << (8 - pos));
 
-    // Aggiorno le mosse disponibili
+    // Update available moves
     movesAvailable.erase(find(movesAvailable.begin(), movesAvailable.end(), pos));
 
     countMoves++;
@@ -249,10 +248,10 @@ bool Board::checkMove(const Move &m) {
 bool Board::checkWin(const Player &p) {
 
     /*
-    mosse_player[USER]:     0b 1 1 1 0 0 0 1 0 0 (simbolo X)
-    mosse_player[COMPUTER]: 0b 0 0 0 0 1 0 0 0 1 (simbolo O)
+    movesPlayer[USER]:     0b 1 1 1 0 0 0 1 0 0 (X)
+    movesPlayer[COMPUTER]: 0b 0 0 0 0 1 0 0 0 1 (O)
 
-    Le mosse corrispondono a questa configurazione:
+    movesPlayer correspond to this board configuration:
     -------------
     | X | X | X |
     -------------
@@ -261,13 +260,13 @@ bool Board::checkWin(const Player &p) {
     | X |   | O |
     -------------
 
-    Confronto bit a bit (&) tra l'intero che rappresenta le mosse di USER e le maschere che
-    rappresentano le condizioni di tris, ad esempio WIN_H_1 che è il tris sulla prima riga orizzontale:
-    se il risultato è uguale alla maschera, USER ha fatto tris
+    bit to bit comparison (&) between movesPlayer (int), representing USER's moves and masks which correspond
+    to win conditions, i.e. WINCON_H_1 win on first row:
+    if the result equals the mask, USER wins
 
-    mosse_player[USER]:     0b 1 1 1 0 0 0 1 0 0
+    movesPlayer[USER]:      0b 1 1 1 0 0 0 1 0 0
                             &
-    WIN_H_1:                0b 1 1 1 0 0 0 0 0 0
+    WINCON_H_1:             0b 1 1 1 0 0 0 0 0 0
     --------------------------------------------
                             0b 1 1 1 0 0 0 0 0 0 = WINCON_H_1
     */
