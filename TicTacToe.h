@@ -1,5 +1,5 @@
-#ifndef board_H
-#define board_H
+#ifndef TicTacToe_H
+#define TicTacToe_H
 
 #include <string>
 #include <vector>
@@ -20,21 +20,25 @@ typedef enum {
     COMPUTER
 } Player;
 
-class Board {
+class TicTacToe {
 
 public:
 
-    Board();
-    ~Board();
+    TicTacToe();
+    ~TicTacToe();
+
+    int run();
+
+private:
 
     void clearBoard();
     void drawBoard();
+	void drawBoard(int maskWin);
     void sortPlayer();
     void endGame();
     bool wannaPlay();    
-    bool gameOver();
 
-	void getPlayerInfo();
+    bool gameOver();
     Player getPlayer();
     Move getUserMove();
     Move getComputerMove();
@@ -42,12 +46,9 @@ public:
     void setMove(const Move &m, const Player &p);
     bool checkMove(const Move &m);
     bool checkWin(const Player &p);
-    
-private:
-
-	void drawBoard(int maskWin);
 	bool checkMask(int movesPlayer, int mask);
 
+	void getPlayerInfo();
     std::string getPlayerName(const Player &p);
     int getRandomInt(int min, int max);
     int getCoord(const std::string &coordType);

@@ -1,4 +1,4 @@
-#include "board.h"
+#include "TicTacToe.h"
 
 #include "ConsoleUtils.h"
 #include <chrono>
@@ -19,16 +19,65 @@ typedef mt19937 MyRNG;
 #define WINCON_O_1 0x111 // 0b100010001
 #define WINCON_O_2 0x054 // 0b001010100
 
-Board::Board() {
+TicTacToe::TicTacToe() {
     Console::ShowConsoleCursor(true);
 }
 
 
-Board::~Board() {
+TicTacToe::~TicTacToe() {
     Console::ShowConsoleCursor(false);
 }
 
-void Board::getPlayerInfo() {
+int TicTacToe::run() {
+
+	while (wannaPlay()) {
+
+		clearBoard();
+		getPlayerInfo();
+        drawBoard();
+        sortPlayer();
+
+        while (!gameOver()) {
+
+			Move m;
+
+			Player p = getPlayer();
+			switch (p) {
+				
+				case USER:
+					// cout << "Player " << m_player_name << endl;
+					m = getUserMove();
+					break;
+	
+				default: // COMPUTER
+					// cout << "Player COMPUTER" << endl;
+					m = getComputerMove();
+					break;
+			}
+
+			if (checkMove(m)) {
+
+				setMove(m, p);
+
+				if (checkWin(p))
+					break;
+				else
+					drawBoard();
+			}	
+           	else {
+
+				cout << "Cell is occupied: make another move!" << endl;
+				cout << "" << endl;
+			}
+	}
+	
+        endGame();
+	}
+
+	return 0;
+}
+
+void TicTacToe::getPlayerInfo() {
 	
 	cout << "Enter your name: ";
 	cin >> m_player_name;
@@ -44,7 +93,7 @@ void Board::getPlayerInfo() {
 	}
 }
 
-void Board::clearBoard() {
+void TicTacToe::clearBoard() {
  
     system("cls");
 	m_player_sym = '\0';
@@ -66,7 +115,7 @@ void Board::clearBoard() {
 	cout << "" << endl;
 }
 
-void Board::drawBoard() {
+void TicTacToe::drawBoard() {
 
 	system("cls");
     
@@ -85,7 +134,7 @@ void Board::drawBoard() {
     cout << "" << endl;
 }
 
-void Board::drawBoard(int maskWin) {
+void TicTacToe::drawBoard(int maskWin) {
 
 	system("cls");
     
@@ -116,13 +165,13 @@ void Board::drawBoard(int maskWin) {
     cout << "" << endl;
 }
 
-void Board::sortPlayer() {
+void TicTacToe::sortPlayer() {
 
     Player p = static_cast<Player>(getRandomInt(USER, COMPUTER));
     m_sort = static_cast<int>(p);
 }
 
-void Board::endGame() {
+void TicTacToe::endGame() {
 
     string choice = "";
     while (choice != "y" && choice != "n") {
@@ -137,11 +186,11 @@ void Board::endGame() {
     }
 }
 
-bool Board::wannaPlay() {
+bool TicTacToe::wannaPlay() {
     return m_play;
 }
 
-int Board::getRandomInt(int min, int max) {
+int TicTacToe::getRandomInt(int min, int max) {
 
     chrono::system_clock::time_point now = chrono::system_clock::now();
     auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
@@ -157,11 +206,11 @@ int Board::getRandomInt(int min, int max) {
     return dist(rng);
 }
 
-bool Board::gameOver() {
+bool TicTacToe::gameOver() {
     return m_countMoves == MAX_MOVES;
 }
 
- Player Board::getPlayer() {
+ Player TicTacToe::getPlayer() {
 
     if (!(m_countMoves % 2) - m_sort)
         return USER;
@@ -169,11 +218,11 @@ bool Board::gameOver() {
         return COMPUTER;
 }
 
-string Board::getPlayerName(const Player &p) {
+string TicTacToe::getPlayerName(const Player &p) {
     return p == USER ? m_player_name : "COMPUTER";
 }
 
-Move Board::getUserMove() {
+Move TicTacToe::getUserMove() {
 
     Move m;
 
@@ -184,7 +233,7 @@ Move Board::getUserMove() {
     return m;
 }
 
-int Board::getCoord(const string &coordType) {
+int TicTacToe::getCoord(const string &coordType) {
 
     // TODO: don't crash if insert char or string
     int c = 0;
@@ -198,7 +247,7 @@ int Board::getCoord(const string &coordType) {
     return c;
 }
 
- Move Board::getComputerMove() {
+ Move TicTacToe::getComputerMove() {
 
     Move m;
 
@@ -240,7 +289,7 @@ int Board::getCoord(const string &coordType) {
     return m;
 }
 
-void Board::setMove(const Move &m, const Player &p) {
+void TicTacToe::setMove(const Move &m, const Player &p) {
 
     int pos;
 
@@ -294,7 +343,7 @@ void Board::setMove(const Move &m, const Player &p) {
     m_countMoves++;
 }
 
-bool Board::checkMove(const Move &m) {
+bool TicTacToe::checkMove(const Move &m) {
 
     for (int i = 0; i < MAX_MOVES; i++) {
 
@@ -305,7 +354,7 @@ bool Board::checkMove(const Move &m) {
     return true;
 }
 
-bool Board::checkWin(const Player &p) {
+bool TicTacToe::checkWin(const Player &p) {
 
     /*
     movesPlayer[USER]:     0b 1 1 1 0 0 0 1 0 0 (X)
@@ -350,7 +399,7 @@ bool Board::checkWin(const Player &p) {
         return false;
 }
 
-bool Board::checkMask(int movesPlayer, int mask) {
+bool TicTacToe::checkMask(int movesPlayer, int mask) {
 	
 	if ((movesPlayer & mask) == mask) {
 	

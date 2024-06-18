@@ -3,7 +3,7 @@
 #include <iostream>
 
 #define HIGHLIGHT_TXT 240
-#define DEFAULT_TXT 15
+#define DEFAULT_TXT 07
 #define GREEN 10
 
 class Console {

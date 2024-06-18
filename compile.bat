@@ -1,1 +1,1 @@
-g++ main.cpp board.cpp -o TicTacToe.exe
+g++ main.cpp Menu.cpp TicTacToe.cpp -o TicTacToe.exe

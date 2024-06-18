@@ -1,53 +1,38 @@
 #include <iostream>
-#include "board.h"
+#include <vector>
+#include "Menu.h"
+#include "TicTacToe.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
+ 
+	vector<string> options = {"New game", "Load game", "Quit"};
+	Menu mainMenu(options);
 
-    Board board;
+	while (1) {
+		
+		int selIndex = mainMenu.run();
+		switch (selIndex) {
 
-    while (board.wannaPlay()) {
+			case NEW_GAME: {
+			
+				TicTacToe game;
+				game.run();
+			}
+				break;
 
-        board.clearBoard();
-        board.getPlayerInfo();
-        board.drawBoard();
-        board.sortPlayer();
+			case LOAD_GAME:
+				mainMenu.clear();
+				cout << "Load game selected: press any key to return to main menu...";
+				system("pause > nul");
+				break;
 
-        while (!board.gameOver()) {
+			default: // QUIT
+				return 0;
+				break;
+		}
+	}
 
-            Move m;
-
-            Player p = board.getPlayer();
-            switch (p) {
-
-                case USER:
-                    m = board.getUserMove();
-                    break;
-
-                default: // COMPUTER
-                    m = board.getComputerMove();
-                    break;
-            }
-
-            if (board.checkMove(m)) {
-
-                board.setMove(m, p);
-
-                if (board.checkWin(p))
-                    break;
-                else
-                    board.drawBoard();
-            }
-            else {
-
-                cout << "Cell is occupied: make another move!" << endl;
-                cout << "" << endl;
-            }
-        }
-
-        board.endGame();
-    }    
-
-    return 0;
+	return 0;
 }
