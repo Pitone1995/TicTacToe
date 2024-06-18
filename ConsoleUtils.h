@@ -1,5 +1,3 @@
-#define _HAS_STD_BYTE 0
-
 #include <windows.h>
 #include <string>
 #include <iostream>
