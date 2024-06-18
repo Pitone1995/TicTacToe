@@ -2,9 +2,10 @@
 #include <string>
 #include <iostream>
 
-#define HIGHLIGHT_TXT 240
-#define DEFAULT_TXT 07
-#define GREEN 10
+// From color --help
+#define HIGHLIGHT_TXT 0xF0
+#define DEFAULT_TXT 0x7
+#define GREEN 0xA
 
 class Console {
 
@@ -28,7 +29,7 @@ public:
 	{
 		HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 
-		CONSOLE_CURSOR_INFO     cursorInfo;
+		CONSOLE_CURSOR_INFO cursorInfo;
 
 		GetConsoleCursorInfo(out, &cursorInfo);
 		cursorInfo.bVisible = showFlag; // set the cursor visibility
