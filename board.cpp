@@ -1,9 +1,11 @@
 #include "board.h"
 
-#include <iostream>
+#include "ConsoleUtils.h"
 #include <chrono>
 #include <random>
 #include <algorithm>
+
+using namespace std;
 
 typedef mt19937 MyRNG;
 
@@ -17,36 +19,94 @@ typedef mt19937 MyRNG;
 #define WINCON_O_1 0x111 // 0b100010001
 #define WINCON_O_2 0x054 // 0b001010100
 
-// Player symbols
-#define S_USER 'X'
-#define S_COMPUTER 'O'
-
 Board::Board() {
+    Console::ShowConsoleCursor(true);
+}
+
+
+Board::~Board() {
+    Console::ShowConsoleCursor(false);
+}
+
+void Board::getPlayerInfo() {
+	
+	cout << "Enter your name: ";
+	cin >> m_player_name;
+	
+	while (m_player_sym != 'X' && m_player_sym != 'O') {
+
+		cout << "Player " << m_player_name << " choose your symbol (O/X): ";		
+		cin >> m_player_sym;
+		if (m_player_sym == 'X')
+			m_computer_sym = 'O';
+		else 
+			m_computer_sym = 'X';
+	}
 }
 
 void Board::clearBoard() {
  
     system("cls");
-    countMoves = 0;
-    movesPlayer.clear();
-    movesAvailable = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+	m_player_sym = '\0';
+	m_computer_sym = '\0';
+    m_countMoves = 0;
+    m_movesPlayer.clear();
+    m_movesAvailable = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
     for (int i = 0; i < MAX_MOVES; i++) {
-        moves[i].c = 0;
-        moves[i].r = 0;
-        moves[i].s = '\0';
+        m_moves[i].c = 0;
+        m_moves[i].r = 0;
+        m_moves[i].s = '\0';
     }
+	
+	cout << "*************************************************" << endl;
+	cout << "*                                               *" << endl;
+	cout << "*                  Tic-Tac-Toe                  *" << endl;
+	cout << "*                                               *" << endl;	
+	cout << "*************************************************" << endl;
+	cout << "" << endl;
 }
 
 void Board::drawBoard() {
 
-    cout << "" << endl;
-
-    cout << "-------------------------------------------------" << endl;
+	system("cls");
+    
+	cout << "-------------------------------------------------" << endl;
     for (int i = 0; i < MAX_MOVES; i++) {
 
-        cout << "|\t" << moves[i].s << "\t";
+        cout << "|\t" << m_moves[i].s << "\t";
 
         if (!((i + 1) % 3) && i) {
+
+            cout << "|" << endl;
+            cout << "-------------------------------------------------" << endl;
+        }
+    }
+
+    cout << "" << endl;
+}
+
+void Board::drawBoard(int maskWin) {
+
+	system("cls");
+    
+	cout << "-------------------------------------------------" << endl;
+    for (int i = 0; i < MAX_MOVES; i++) {
+
+		cout << "|\t";
+		
+		int highlight = (1 << (MAX_MOVES - i - 1)) & maskWin;
+		if (highlight) {
+			
+			Console::setColor(GREEN);
+			cout << m_moves[i].s;
+			Console::resetColor();
+		}
+		else
+			cout << m_moves[i].s;
+		
+		cout << "\t";
+        
+		if (!((i + 1) % 3) && i) {
 
             cout << "|" << endl;
             cout << "-------------------------------------------------" << endl;
@@ -59,7 +119,7 @@ void Board::drawBoard() {
 void Board::sortPlayer() {
 
     Player p = static_cast<Player>(getRandomInt(USER, COMPUTER));
-    sort = static_cast<int>(p);
+    m_sort = static_cast<int>(p);
 }
 
 void Board::endGame() {
@@ -71,14 +131,14 @@ void Board::endGame() {
         cin >> choice;
 
         if (choice == "y")
-            play = true;
+            m_play = true;
         else if (choice == "n")
-            play = false;
+            m_play = false;
     }
 }
 
 bool Board::wannaPlay() {
-    return play;
+    return m_play;
 }
 
 int Board::getRandomInt(int min, int max) {
@@ -98,19 +158,19 @@ int Board::getRandomInt(int min, int max) {
 }
 
 bool Board::gameOver() {
-    return countMoves == MAX_MOVES;
+    return m_countMoves == MAX_MOVES;
 }
 
  Player Board::getPlayer() {
 
-    if (!(countMoves % 2) - sort)
+    if (!(m_countMoves % 2) - m_sort)
         return USER;
     else
         return COMPUTER;
 }
 
 string Board::getPlayerName(const Player &p) {
-    return p == USER ? "USER" : "COMPUTER";
+    return p == USER ? m_player_name : "COMPUTER";
 }
 
 Move Board::getUserMove() {
@@ -119,7 +179,7 @@ Move Board::getUserMove() {
 
     m.r = getCoord("row");
     m.c = getCoord("column");
-    m.s = S_USER;
+    m.s = m_player_sym;
 
     return m;
 }
@@ -141,10 +201,10 @@ int Board::getCoord(const string &coordType) {
  Move Board::getComputerMove() {
 
     Move m;
-    
+
     // COMPUTER picks a random move in movesAvailable
-    int index = getRandomInt(0, movesAvailable.size() - 1);
-    int pos = movesAvailable.at(index);
+    int index = getRandomInt(0, m_movesAvailable.size() - 1);
+    int pos = m_movesAvailable.at(index);
 
     /*
     Map pos in r,c:
@@ -175,7 +235,7 @@ int Board::getCoord(const string &coordType) {
         break;
     }
 
-    m.s = S_COMPUTER;
+    m.s = m_computer_sym;
 
     return m;
 }
@@ -206,7 +266,7 @@ void Board::setMove(const Move &m, const Player &p) {
     }
 
     // Save move in the general array
-    moves[pos] = m;
+    m_moves[pos] = m;
 
     /*
     movesPlayer[p] is an integer that represents moves of player p
@@ -226,19 +286,19 @@ void Board::setMove(const Move &m, const Player &p) {
     {r,c} = 1,3 -> pos = 2
     movesPlayer[p] =          0b 1 1 1 0 0 0 1 0 0
     */
-    movesPlayer[p] |= (1 << (8 - pos));
+    m_movesPlayer[p] |= (1 << (8 - pos));
 
     // Update available moves
-    movesAvailable.erase(find(movesAvailable.begin(), movesAvailable.end(), pos));
+    m_movesAvailable.erase(find(m_movesAvailable.begin(), m_movesAvailable.end(), pos));
 
-    countMoves++;
+    m_countMoves++;
 }
 
 bool Board::checkMove(const Move &m) {
 
     for (int i = 0; i < MAX_MOVES; i++) {
 
-        if (moves[i].r == m.r && moves[i].c == m.c)
+        if (m_moves[i].r == m.r && m_moves[i].c == m.c)
             return false;
     }
 
@@ -271,21 +331,32 @@ bool Board::checkWin(const Player &p) {
                             0b 1 1 1 0 0 0 0 0 0 = WINCON_H_1
     */
 
-    if (
-        (movesPlayer[p] & WINCON_H_1) == WINCON_H_1 ||
-        (movesPlayer[p] & WINCON_H_2) == WINCON_H_2 ||
-        (movesPlayer[p] & WINCON_H_3) == WINCON_H_3 ||
-        (movesPlayer[p] & WINCON_V_1) == WINCON_V_1 ||
-        (movesPlayer[p] & WINCON_V_2) == WINCON_V_2 ||
-        (movesPlayer[p] & WINCON_V_3) == WINCON_V_3 ||
-        (movesPlayer[p] & WINCON_O_1) == WINCON_O_1 ||
-        (movesPlayer[p] & WINCON_O_2) == WINCON_O_2
-        ) {
-        cout << "The winner is: [" << getPlayerName(p) << "]" << endl;
+	if (
+        checkMask(m_movesPlayer[p], WINCON_H_1) ||
+		checkMask(m_movesPlayer[p], WINCON_H_2) ||
+		checkMask(m_movesPlayer[p], WINCON_H_3) ||
+		checkMask(m_movesPlayer[p], WINCON_V_1) ||
+		checkMask(m_movesPlayer[p], WINCON_V_2) ||
+		checkMask(m_movesPlayer[p], WINCON_V_3) ||
+		checkMask(m_movesPlayer[p], WINCON_O_1) ||
+		checkMask(m_movesPlayer[p], WINCON_O_2)
+		) {
+        cout << "The winner is: " << getPlayerName(p) << endl;
         cout << "" << endl;
 
         return true;
     }
     else
         return false;
+}
+
+bool Board::checkMask(int movesPlayer, int mask) {
+	
+	if ((movesPlayer & mask) == mask) {
+	
+		drawBoard(mask);
+		return true;
+	}
+	else
+		return false;
 }

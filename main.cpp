@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
     while (board.wannaPlay()) {
 
         board.clearBoard();
+        board.getPlayerInfo();
         board.drawBoard();
         board.sortPlayer();
 
@@ -21,12 +22,10 @@ int main(int argc, char *argv[]) {
             switch (p) {
 
                 case USER:
-                    cout << "Player [USER]" << endl;
                     m = board.getUserMove();
                     break;
 
                 default: // COMPUTER
-                    cout << "Player [COMPUTER]" << endl;
                     m = board.getComputerMove();
                     break;
             }
@@ -34,10 +33,11 @@ int main(int argc, char *argv[]) {
             if (board.checkMove(m)) {
 
                 board.setMove(m, p);
-                board.drawBoard();
 
                 if (board.checkWin(p))
                     break;
+                else
+                    board.drawBoard();
             }
             else {
 
